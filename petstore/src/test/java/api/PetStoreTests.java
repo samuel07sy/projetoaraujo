@@ -36,7 +36,26 @@ public class PetStoreTests {
             .statusCode(200)
             .body("id", equalTo(8425))
             .body("status", equalTo("placed"));
+
     }
+    public void testPostPedidoFalha() {
+        Store order = new Store();
+        order.setId(826);
+        order.setPetId(8426);
+        order.setQuantity(-1);
+        order.setStatus("placed");
+        order.setComplete(true);
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(order)
+        .when()
+            .post("/store/order")
+        .then()
+            .statusCode(400);
+
+    }
+
 
     @Test
     public void testGetPetById() {
@@ -47,7 +66,6 @@ public class PetStoreTests {
         ArrayList<String> photoUrls = new ArrayList<>();
         photoUrls.add("http://example.com/photo.jpg");
         pet.setPhotoUrls(photoUrls);
-
 
         given()
             .contentType(ContentType.JSON)
@@ -70,6 +88,13 @@ public class PetStoreTests {
             .pathParams("petId", 825, "status", "available")
         .when()
             .get("/pet/{petId}/pet/{status}")
+        .then()
+            .statusCode(404);
+
+        given()
+            .pathParams("petId", 825, "name", "Caramelo errado")
+        .when()
+            .get("/pet/{petId}/pet/{name}")
         .then()
             .statusCode(404);
     }
@@ -101,6 +126,36 @@ public class PetStoreTests {
         .then()
             .statusCode(200)
             .body("status", equalTo("sold"));
+
+        pet.setName("Caramelo atualizado");
+        given()
+            .contentType(ContentType.JSON)
+            .body(pet)
+        .when()
+            .put("/pet")
+        .then()
+            .statusCode(200)
+            .body("name", equalTo("Caramelo atualizado"));
+
+    }
+
+    @Test
+    public void testPutPetFalha() {
+        Pet pet = new Pet();
+        pet.setId(8255);
+        pet.setName("Caramelo update");
+        pet.setStatus("available");
+        ArrayList<String> photoUrls = new ArrayList<>();
+        photoUrls.add("http://example.com/photo.jpg");
+        pet.setPhotoUrls(photoUrls);
+    
+        given()
+            .contentType(ContentType.JSON)
+            .body(pet)
+        .when()
+            .put("/pet/8255") 
+        .then()
+            .statusCode(405); 
     }
 
     @Test
